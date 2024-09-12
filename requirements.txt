@@ -1,0 +1,6 @@
+molmass
+matplotlib
+numpy
+prodimopy
+pandas
+scipy

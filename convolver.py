@@ -53,7 +53,7 @@ class Convolver:
                 if i==len(d)-1:
                     channel["wu"] = channel["wavelength_upper"]
                 else:
-                    channel["wu"] = d[i+1]["wl"]
+                    channel["wu"] = d[i+1]["wavelength_lower"]
                 channel["wl"] = channel["wavelength_lower"]
             elif wavelength_overlap=="optimal":
                 if i==0:
@@ -86,7 +86,7 @@ class Convolver:
                     else:
                         channel["wu"] = d[i+1]["wavelength_lower"]
                 elif i==len(d)-1:
-                    channel["wu"] == channel["wavelength_upper"]
+                    channel["wu"] = channel["wavelength_upper"]
                     if channel["resolving_power"] < d[i-1]["resolving_power"]:
                         channel["wl"] = channel["wavelength_lower"]
                     else:
