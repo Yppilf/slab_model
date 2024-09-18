@@ -1,0 +1,18 @@
+- Define the list of molecules used
+- Read in the parameters for a spectrum from a file. Each line is 1 set of parameters
+- Create a convolver object for each of the different possible settings
+- For each set of parameters, generate a slab model
+    - Create a Molecule object for each of the molecules at a given temperature
+        - Save parameters of the molecule
+        - Determine molar weight of the molecule (Done with a library)
+    - Get data from a given molecule object
+        - Use a library to read in a hitran file given certain parameters
+        - Extract certain columns from the read data
+    - For each of the wavelength channels, generate a slab model spectrum
+        - Use a prodimopy 0D slab model given the parameters, including a wavelength range. Create spectrum over the total wavelength range
+    - Convolve according to the right convolver. Different wavelength ranges have different resolving powers thus have to be handled separately. It is done using library methods
+        - Slide over the spectrum and take slices based on the wavelengths specified in the convolver
+        - Convolve each slice separately
+        - Concatenate the slices back together. Convolver already handles overlap
+    - Sum the intensities of the spectra for each molecule
+- Save each spectrum in an efficient way to a file

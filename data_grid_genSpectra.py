@@ -14,7 +14,7 @@ def save_spectrum(filename, wavelengths, summed_intensities, numberdensities):
 def process_spectra(parameters_file, output_dir):
     with open(parameters_file, 'r') as file:
         for line_num, line in enumerate(file, start=1):
-            if line_num == 1: 
+            if line_num <= 2: 
                 continue    # first spectrum is generated in testing areadt
             params = eval(line.strip())  # Converts the string of parameters back into a tuple/list
             print(f"Processing spectrum {line_num}")
@@ -36,7 +36,5 @@ def process_spectra(parameters_file, output_dir):
             # Save the wavelengths, summed intensities, and number densities to disk
             filename = f"{output_dir}/spectrum_{line_num}.npz"
             save_spectrum(filename, wavelengths, summed_intensities, numberdensities)
-
-            break
 
 process_spectra(parameters_file, "/scratch/s4950836/spectra")

@@ -1,0 +1,7 @@
+#include "Molecule.h"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <regex>
+
+using namespace std;

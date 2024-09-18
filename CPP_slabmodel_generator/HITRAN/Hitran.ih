@@ -1,0 +1,8 @@
+#include "Hitran.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <stdexcept>
+
+using namespace std;
