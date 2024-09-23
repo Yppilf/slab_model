@@ -1,0 +1,11 @@
+#include "SlabModel.h"
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+#include <cmath>
+#include <unordered_map>
+#include <sstream>
+#include <cassert>
+#include <algorithm>
+
+using namespace std;

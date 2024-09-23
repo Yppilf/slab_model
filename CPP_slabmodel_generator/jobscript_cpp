@@ -9,7 +9,6 @@
 
 module purge
 module load GCC
-module load Eigen
 
 srun make clean
 srun make
