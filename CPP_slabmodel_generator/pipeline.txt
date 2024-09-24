@@ -16,3 +16,5 @@
         - Concatenate the slices back together. Convolver already handles overlap
     - Sum the intensities of the spectra for each molecule
 - Save each spectrum in an efficient way to a file
+
+Note that a slab model at a given temperature and number density will always be the same for a single molecule, so it doesn't need to be generated multiple times

@@ -1,6 +1,6 @@
 import numpy as np
 from slab_model import generateSlabModel
-import pandas as pd
+import pandas as pd # type: ignore
 pd.set_option('future.no_silent_downcasting', True)
 
 parameters_file = "permutations3.txt"

@@ -1,0 +1,55 @@
+Phase 1: precomputations
+We create some objects that will have to be reused many times and will be the same
+Can be multiprocessed: No
+- Generate a convolver object for each type of setting present/possible
+- For each molecule modelled, calculate the molar weight 
+- For each molecule modelled, read the hitran file over the entire wavelength range     // Not necessary since this already happens in the slab generation and I will not remake that
+- Read the parameters for which the slab models need to be generated, each line being one set of parameters
+
+Phase 2: slab model piece generations
+We create collections of slab models that are unconvolved and uncombined and save their locations together for a single slab model
+Can be multiprocessed: yes (use a semaphore, make sure slabs aren't created double)
+- Load the current parameters into memory
+- For each of the combinations of number density,temperature for each molecule, check if the slab is already generated
+- If not, generate the slab for that combination and save it to a file. Save filepath to list
+- If yes, save the filepath to where it is saved
+- Move on till all the parameters are read
+
+Phase 3: Convolved piece generator
+We convolve single molecule slabs given a setting and save that as a new building block
+Can be multiprocessed: yes, we could either multiprocess within a collection or between collections
+- Take a created collection from phase 2
+- Load the convolver corresponding to the right setting(s) into memory
+- Loop through the different slab files
+- Check if this combination of file + convolver has already been made
+- If not, convolve the slab and save it as a new file. Save filepath to list + setting
+- If yes, retrieve the filepath where it is stored and save it to a new collection
+- Repeat for all collections from phase 2
+
+
+Due to the fact objects are created with generating slab models, we have to combine phase 2 and 3, increasing the number of computations, so we get the following phase
+Phase 2,3: Total piece generator
+Can be multiprocessed: yes
+- Look at a set of parameters
+- Create a new set of parameters for (molecule, temperature, column_density, convolver_settings)
+- Check if item is already generated, else generate the slab
+    - For each wavelengthrange /* 1 channel */ based on the convolver, generate a slab
+    - For each molecule, concatenate the different wavelength windows, resulting in a spectrum for (molecule, temperature, column_density, convolver_settings)
+
+
+Phase 4: Combine pieces
+Combine the convolved pieces into single spectra and apply final processes to spectrum
+Can be multiprocessed: yes, each spectrum can be handled separately
+- Load a collection from phase 3
+- Load all the spectra from the filenames
+- Add the intensities together for all the molecules (Wavelengths are the same since same convolver is used)
+- Normalize the spectrum to 1 (Not relevant for data generation but makes it easier later on to process)
+- Save the wavelengths, intensities and used number densities in some data-efficient format that does not lose information
+- Repeat for all collections
+
+Phase 5: Cleanup
+Make sure no unnecessary storage is used
+Can be multiprocessed: No
+- Remove all the files from the convolved pieces
+- Remove all files from unconvolved pieces
+- Free all dynamically allocated memory
