@@ -18,8 +18,8 @@ class Molecule:
         """
         self.molecule = moleculeName
         self.isotopologue = isotopes
-        self.filepath = './hitran/'+moleculeName+'.par'
-        self.QTpath = './QTpy/'
+        self.filepath = 'data/hitran/'+moleculeName+'.par'
+        self.QTpath = 'data/QTpy/'
 
         f = Formula(moleculeName)
         self.mol_mass = f.mass
@@ -59,6 +59,10 @@ class Molecule:
                                 mode       = 'line_by_line',            # "line-by-line" calculation, or include mutual "overlap"
                                 output     = 'return',                  # "return" data or write to "file" or do "both"
                                 )
+        
+        # print(dir(self.data))
+        print(self.data.linedata)
+        print(self.data.nlines)
         
     # def saveSlab(self):
     #     solid_angle = np.pi*(0.125*au)**2/(155*pc)**2   # Solid angle = emitting area / distance^2
