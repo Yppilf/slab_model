@@ -30,7 +30,7 @@ def genSlab(slabs, params, molecule_list, storagePath, convolvers):
         fname = f"{mol.molecule}_{params[-2]}_{params[i]}_{params[-1]}"
         fullPath = f"{storagePath}/{fname}.npz"
         slabPaths.append(fullPath)
-        if fname in slabs:
+        if fullPath in slabs:
             continue
         slabs.append(fullPath)
 
