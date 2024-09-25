@@ -9,7 +9,6 @@ parameters_file = "data/testPermutations.txt"
 convolver_file = "data/convolver_data/JWST_MIRI_MRS.json"
 molecule_list = ["H2O", "OH", "CO", "CO2", "NH3", "SO2"] 
 convolver_settings = ["lower", "upper", "optimal", "minimal"]
-wavelengthRange = (5.00, 27.50)
 # storagePath = "/scratch/s4950836"
 storagePath = "."
 
@@ -72,7 +71,7 @@ def combineSingleSlabs(filepaths, storagePath, idx):
 
     np.savez_compressed(f"{storagePath}/spectrum{idx}.npz", wavelengths=wavelengths, intensities=totalIntensityNormalized, molecules=molecules, numberDensitites=numberDensitites)
 
-def main(convolver_settings, convolver_file, molecule_list, param_filepath, wavelengthRange, storagePath):
+def main(convolver_settings, convolver_file, molecule_list, param_filepath, storagePath):
     # Phase 1
     # Generate a convolver object for each type of setting present/possible
     convolvers = genConvolvers(convolver_settings, convolver_file)
@@ -100,4 +99,4 @@ def main(convolver_settings, convolver_file, molecule_list, param_filepath, wave
     #     os.remove(file)
 
 if __name__ == "__main__":
-    main(convolver_settings, convolver_file, molecule_list, parameters_file, wavelengthRange, storagePath)
+    main(convolver_settings, convolver_file, molecule_list, parameters_file, storagePath)
