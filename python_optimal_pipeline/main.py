@@ -34,20 +34,17 @@ def genSlab(slabs, params, molecule_list, storagePath, convolvers):
             continue
         slabs.append(fullPath)
 
-        newWavelenghts = []
-        newIntensities = []
-        for j,channel in enumerate(conv.data):
-            # For each wavelengthrange /* 1 channel */ based on the convolver, generate a slab
-            molec = copy.deepcopy(mol)
-            molec.generateSlab(params[i], params[-2], channel["wl"], channel["wu"])
-            molec = conv.convolveData(molec, channel["wl"], channel["wu"])
-            newWavelenghts.extend(molec.convWavelength)
-            newIntensities.extend(molec.convIntensity)
-            print(molec.convIntensity, max(molec.convIntensity))
-            return
+        # newWavelenghts = []
+        # newIntensities = []
+        # for j,channel in enumerate(conv.data):
+        #     # For each wavelengthrange /* 1 channel */ based on the convolver, generate a slab
+        #     molec = copy.deepcopy(mol)
+        #     molec.generateSlab(10**params[i], params[-2], channel["wl"], channel["wu"])
+        #     molec = conv.convolveData(molec, channel["wl"], channel["wu"])
+        #     newWavelenghts.extend(molec.convWavelength)
+        #     newIntensities.extend(molec.convIntensity)
 
-        print(fullPath, params)
-        np.savez_compressed(fullPath, wavelengths=newWavelenghts, intensities=newIntensities)
+        # np.savez_compressed(fullPath, wavelengths=newWavelenghts, intensities=newIntensities)
 
     return slabs, slabPaths
             
@@ -61,16 +58,14 @@ def combineSingleSlabs(filepaths, storagePath, idx):
     for path in filepaths:
         loadedSpectrum = np.load(path)
         params = path.split("/")[-1].split(".npz")[0].split("_")
-        print(params, idx)
         molecules.append(params[0])
-        numberDensitites.append(2)
+        numberDensitites.append(float(params[2]))
         if len(wavelengths) < 1:
             wavelengths = loadedSpectrum["wavelengths"]
             totalIntensity = np.array(loadedSpectrum["intensities"])
         else:
             totalIntensity += loadedSpectrum["intensities"]
 
-        print(totalIntensity)
 
     # Normalize the spectrum to 1 (Not relevant for data generation but makes it easier later on to process)
     totalIntensityNormalized = totalIntensity/np.max(totalIntensity)

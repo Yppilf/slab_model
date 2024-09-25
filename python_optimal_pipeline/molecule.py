@@ -60,10 +60,6 @@ class Molecule:
                                 output     = 'return',                  # "return" data or write to "file" or do "both"
                                 )
         
-        # print(dir(self.data))
-        print(self.data.linedata)
-        print(self.data.nlines)
-        
     # def saveSlab(self):
     #     solid_angle = np.pi*(0.125*au)**2/(155*pc)**2   # Solid angle = emitting area / distance^2
     #     convWavelengths = self.convWavelength

@@ -1,16 +1,16 @@
 import numpy as np
 from matplotlib.pyplot import figure,savefig
 
-loaded = np.load("H2O_1300_18.0_lower.npz")
+loaded = np.load("spectrum2.npz")
 wavelength = loaded["wavelengths"]
 intensities = loaded["intensities"]
-# molecules = loaded["molecules"]
-# densities = loaded["numberDensitites"]
-print(wavelength)
-print(max(intensities))
-# print(molecules)
-# print(densities)
-# fig=figure()
-# frame = fig.add_subplot()
-# frame.plot(wavelength, intensities)
-# savefig("spectrum0.png")
+molecules = loaded["molecules"]
+densities = loaded["numberDensitites"]
+
+fig=figure()
+frame = fig.add_subplot()
+frame.plot(wavelength, intensities)
+frame.set_xlabel("wavelength")
+frame.set_ylabel("intensity")
+print(molecules, densities)
+savefig("spectrum2.png")
