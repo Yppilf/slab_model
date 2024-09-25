@@ -34,17 +34,17 @@ def genSlab(slabs, params, molecule_list, storagePath, convolvers):
             continue
         slabs.append(fullPath)
 
-        # newWavelenghts = []
-        # newIntensities = []
-        # for j,channel in enumerate(conv.data):
-        #     # For each wavelengthrange /* 1 channel */ based on the convolver, generate a slab
-        #     molec = copy.deepcopy(mol)
-        #     molec.generateSlab(10**params[i], params[-2], channel["wl"], channel["wu"])
-        #     molec = conv.convolveData(molec, channel["wl"], channel["wu"])
-        #     newWavelenghts.extend(molec.convWavelength)
-        #     newIntensities.extend(molec.convIntensity)
+        newWavelenghts = []
+        newIntensities = []
+        for j,channel in enumerate(conv.data):
+            # For each wavelengthrange /* 1 channel */ based on the convolver, generate a slab
+            molec = copy.deepcopy(mol)
+            molec.generateSlab(10**params[i], params[-2], channel["wl"], channel["wu"])
+            molec = conv.convolveData(molec, channel["wl"], channel["wu"])
+            newWavelenghts.extend(molec.convWavelength)
+            newIntensities.extend(molec.convIntensity)
 
-        # np.savez_compressed(fullPath, wavelengths=newWavelenghts, intensities=newIntensities)
+        np.savez_compressed(fullPath, wavelengths=newWavelenghts, intensities=newIntensities)
 
     return slabs, slabPaths
             
