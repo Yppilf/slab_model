@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib.pyplot import figure,savefig
 
-loaded = np.load("spectrum2.npz")
+loaded = np.load("spectra/spectrum0.npz")
 wavelength = loaded["wavelengths"]
 intensities = loaded["intensities"]
 molecules = loaded["molecules"]
@@ -13,4 +13,4 @@ frame.plot(wavelength, intensities)
 frame.set_xlabel("wavelength")
 frame.set_ylabel("intensity")
 print(molecules, densities)
-savefig("spectrum2.png")
+savefig("spectra/spectrum0.png")

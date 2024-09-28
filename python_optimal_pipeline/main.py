@@ -10,7 +10,7 @@ convolver_file = "data/convolver_data/JWST_MIRI_MRS.json"
 molecule_list = ["H2O", "OH", "CO", "CO2", "NH3", "SO2"] 
 convolver_settings = ["lower", "upper", "optimal", "minimal"]
 # storagePath = "/scratch/s4950836"
-storagePath = "."
+storagePath = "./spectra"
 
 def genConvolvers(settings, convFile):
     convolvers = {}

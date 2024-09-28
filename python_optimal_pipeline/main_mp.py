@@ -2,18 +2,17 @@ import numpy as np
 from convolver import Convolver
 from molecule import Molecule
 import os, copy
-from multiprocessing import Semaphore, Pool
+from multiprocessing import Pool
 import pandas as pd # type: ignore
 
 pd.set_option('future.no_silent_downcasting', True)
 
-parameters_file = "data/testPermutations.txt"
+parameters_file = "data/permutations3.txt"
 convolver_file = "data/convolver_data/JWST_MIRI_MRS.json"
 molecule_list = ["H2O", "OH", "CO", "CO2", "NH3", "SO2"] 
 convolver_settings = ["lower", "upper", "optimal", "minimal"]
-# storagePath = "/scratch/s4950836"
-storagePath = "."
-num_cores = 6
+storagePath = "/scratch/s4950836"
+num_cores = 50
 
 def genConvolvers(settings, convFile):
     convolvers = {}
@@ -23,43 +22,57 @@ def genConvolvers(settings, convFile):
         convolvers[setting] = conv
     return convolvers
 
-def genSlab(slabs, params, molecule_list, storagePath, convolvers, sem):
-    slabPaths = []
+def subprocess(params):
+    slabs, storagePath, mol, temp, log10dens, convSetting, conv = params
+    fname = f"{mol.molecule}_{temp}_{log10dens}_{convSetting}"
+    fullPath = f"{storagePath}/{fname}.npz"
 
+    if fullPath in slabs:
+        return fullPath  # Slab already exists, no need to regenerate
+    slabs.append(fullPath)  # Add new slab path
+
+    newWavelengths = []
+    newIntensities = []
+    
+    for j, channel in enumerate(conv.data):
+        # For each wavelength range based on the convolver, generate a slab
+        molec = copy.deepcopy(mol)
+        molec.generateSlab(10**log10dens, temp, channel["wl"], channel["wu"])
+        molec = conv.convolveData(molec, channel["wl"], channel["wu"])
+        newWavelengths.extend(molec.convWavelength)
+        newIntensities.extend(molec.convIntensity)
+
+    # Sort wavelengths and intensities together
+    sorted_indices = np.argsort(newWavelengths)
+    newWavelengths = np.array(newWavelengths)[sorted_indices]
+    newIntensities = np.array(newIntensities)[sorted_indices]
+
+    # Save the slab data to a compressed file
+    np.savez_compressed(fullPath, wavelengths=newWavelengths, intensities=newIntensities)
+
+    return fullPath
+
+def genSlab(slabs, params, molecule_list, storagePath, convolvers):
     # Create a new set of parameters for (molecule, temperature, column_density, convolver_settings)
     conv = convolvers[params[-1]]
-    with sem:
-        for i, mol in enumerate(molecule_list):
-            fname = f"{mol.molecule}_{params[-2]}_{params[i]}_{params[-1]}"
-            fullPath = f"{storagePath}/{fname}.npz"
-            slabPaths.append(fullPath)
 
-            if fullPath in slabs:
-                continue  # Slab already exists, no need to regenerate
-            slabs.append(fullPath)  # Add new slab path
+    # slabPaths = []
+    # for i, mol in enumerate(molecule_list):
+    #     fullPath = subprocess(slabs, mol, params[-2], params[i], params[-1], conv)
+    #     slabPaths.append(fullPath)
+    #     slabs.append(fullPath)
 
-            newWavelengths = []
-            newIntensities = []
-            
-            for j, channel in enumerate(conv.data):
-                # For each wavelength range based on the convolver, generate a slab
-                molec = copy.deepcopy(mol)
-                molec.generateSlab(10**params[i], params[-2], channel["wl"], channel["wu"])
-                molec = conv.convolveData(molec, channel["wl"], channel["wu"])
-                newWavelengths.extend(molec.convWavelength)
-                newIntensities.extend(molec.convIntensity)
+    param_list = [(slabs, storagePath, mol, params[-2], params[i], params[-1], conv) for i, mol in enumerate(molecule_list)]
+    with Pool(num_cores) as pool:
+        slabPaths = pool.map(subprocess, param_list)
 
-            # Sort wavelengths and intensities together
-            sorted_indices = np.argsort(newWavelengths)
-            newWavelengths = np.array(newWavelengths)[sorted_indices]
-            newIntensities = np.array(newIntensities)[sorted_indices]
-
-            # Save the slab data to a compressed file
-            np.savez_compressed(fullPath, wavelengths=newWavelengths, intensities=newIntensities)
+    # slabPaths = [subprocess(slabs, storagePath, mol, params[-2], params[i], params[-1], conv) for i, mol in enumerate(molecule_list)]
+    slabs.extend(slabPaths)
 
     return slabs, slabPaths
             
-def combineSingleSlabs(filepaths, storagePath, idx):
+def combineSingleSlabs(params):
+    filepaths, storagePath, idx = params
     totalIntensity = None
     wavelengths = []
     molecules = []
@@ -85,7 +98,6 @@ def combineSingleSlabs(filepaths, storagePath, idx):
 
 def main(convolver_settings, convolver_file, molecule_list, param_filepath, storagePath, num_cores):
     # Create a semaphore with a count of 1
-    sem = Semaphore(num_cores)
 
     # Phase 1
     # Generate a convolver object for each type of setting present/possible
@@ -102,16 +114,20 @@ def main(convolver_settings, convolver_file, molecule_list, param_filepath, stor
             params = eval(line.strip())  # Converts the string of parameters back into a tuple/list
             
             # Phase 2,3
-            generated, slabPaths = genSlab(generated, params, molecules, storagePath, convolvers, sem)
+            generated, slabPaths = genSlab(generated, params, molecules, storagePath, convolvers)
             singleMoleculeSlabs.append(slabPaths)
     
     # Phase 4
-    for i,collection in enumerate(singleMoleculeSlabs):
-        combineSingleSlabs(collection, storagePath, i)
+    param_list = [(collection,storagePath,i) for i,collection in enumerate(singleMoleculeSlabs)]
+    with Pool(num_cores) as pool:
+        pool.map(combineSingleSlabs, param_list)
+
+    # for i,collection in enumerate(singleMoleculeSlabs):
+    #     combineSingleSlabs(collection, storagePath, i)
 
     # Phase 5
-    # for file in generated:
-    #     os.remove(file)
+    for file in generated:
+        os.remove(file)
 
 if __name__ == "__main__":
     main(convolver_settings, convolver_file, molecule_list, parameters_file, storagePath, num_cores)
