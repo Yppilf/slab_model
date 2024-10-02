@@ -7,11 +7,11 @@ import pandas as pd # type: ignore
 
 pd.set_option('future.no_silent_downcasting', True)
 
-parameters_file = "data/permutations4.txt"
+parameters_file = "data/broad_so2_dataset.txt"
 convolver_file = "data/convolver_data/JWST_MIRI_MRS.json"
-molecule_list = ["H2O", "OH", "CO", "CO2", "NH3", "SO2"] 
+molecule_list = ["H2O", "OH", "CO", "CO2", "NH3", "HCN", "C2H2", "SO2"]
 convolver_settings = ["lower", "upper", "optimal", "minimal"]
-storagePath = "./spectra"
+storagePath = "/scratch/s4950836/spectra2"
 num_cores = 4
 
 def genConvolvers(settings, convFile):
@@ -48,6 +48,7 @@ def subprocess(params):
     newIntensities = np.array(newIntensities)[sorted_indices]
 
     # Save the slab data to a compressed file
+    print(f"Writing to {fullPath}")
     np.savez_compressed(fullPath, wavelengths=newWavelengths, intensities=newIntensities)
 
     return fullPath
@@ -126,8 +127,8 @@ def main(convolver_settings, convolver_file, molecule_list, param_filepath, stor
     #     combineSingleSlabs(collection, storagePath, i)
 
     # Phase 5
-    # for file in generated:
-    #     os.remove(file)
+    for file in generated:
+        os.remove(file)
 
 if __name__ == "__main__":
     main(convolver_settings, convolver_file, molecule_list, parameters_file, storagePath, num_cores)
